@@ -345,3 +345,31 @@ body {
   text-decoration: none;
   color: rgba(176, 53, 16, 0.571);
 }
+.letter-status {
+  text-align: center;
+  color: #a08060;
+  font-size: 15px;
+  font-style: italic;
+  padding: 28px 12px 8px;
+}
+
+.letter-status-retry {
+  display: block;
+  margin: 14px auto 0;
+  padding: 8px 22px;
+  border: 1px solid rgba(168, 144, 110, 0.6);
+  border-radius: 999px;
+  background: transparent;
+  color: #d9b892;
+  font-family: var(--main-font);
+  font-size: 14px;
+  font-style: italic;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.letter-status-retry:hover,
+.letter-status-retry:focus-visible {
+  border-color: #d9b892;
+  color: var(--paper-dark);
+}

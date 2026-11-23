@@ -53,5 +53,14 @@ Peter Parker`
     I know I've made mistakes, and I know I've kept things from you that I probably shouldn't have. But through all of it, you've stayed by my side. You make me want to be better—not because you expect me to be perfect, but because being with you makes me want to become someone worthy of the way you believe in me.
 Love,
 Peter`
+  },
+  {
+    id: 5,
+    date: 'Aug 31, 2026',
+    title: 'Custom Letter Title 5',
+    content: `Dear MJ,
+    There are so many things I wish I could tell you, but somehow every time I try, the words never seem to be enough. You're the person who sees me when I don't even know how to see myself. When everything feels overwhelming, just hearing your voice reminds me that maybe things aren't as hopeless as they seem.
+    I know I've made mistakes, and I know I've kept things from you that I probably shouldn't have. But through all of it, you've stayed by my side. You make me want to be better—not because you expect me to be perfect, but because being with you makes me want to become someone worthy of the way you believe in me.
+Love,`
   }
 ];

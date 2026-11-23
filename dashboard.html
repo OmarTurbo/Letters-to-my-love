@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Letters dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/dashboard.css">
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <p class="eyebrow">Letters to my love</p>
+      <h1>Letters dashboard</h1>
+      <p class="header-copy">Write, shape, and keep every little feeling in one place.</p>
+      <button id="new-letter" class="button button-primary" type="button" hidden>New letter</button>
+    </header>
+
+    <section id="login-view" class="panel login-panel">
+      <p class="eyebrow">Private writing room</p>
+      <h2>Open the dashboard</h2>
+      <p class="muted">Enter your admin password to manage the letters.</p>
+      <form id="login-form">
+        <label for="password">Admin password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <p id="login-error" class="form-error" role="alert"></p>
+        <button class="button button-primary" type="submit">Open dashboard</button>
+      </form>
+    </section>
+
+    <section id="dashboard-view" hidden>
+      <div class="toolbar">
+        <div>
+          <p class="eyebrow">Your collection</p>
+          <h2><span id="letter-count">0</span> letters</h2>
+        </div>
+        <button id="lock-dashboard" class="button button-ghost" type="button">Lock</button>
+      </div>
+
+      <p id="status" class="status" aria-live="polite"></p>
+      <div id="letter-list" class="dashboard-list"></div>
+
+      <section id="editor" class="panel editor-panel" hidden>
+        <div class="editor-heading">
+          <div>
+            <p class="eyebrow">A new page</p>
+            <h2 id="editor-title">Write a letter</h2>
+          </div>
+          <button id="cancel-editor" class="button button-ghost" type="button">Cancel</button>
+        </div>
+        <form id="letter-form">
+          <input id="letter-id" type="hidden">
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" maxlength="200" required placeholder="A quiet thought about us">
+          <label for="date">Date</label>
+          <input id="date" name="date" type="date" required>
+          <label for="content">Letter</label>
+          <textarea id="content" name="content" maxlength="50000" required placeholder="Dear..." ></textarea>
+          <p id="form-error" class="form-error" role="alert"></p>
+          <button id="save-letter" class="button button-primary" type="submit">Save letter</button>
+        </form>
+      </section>
+    </section>
+  </main>
+  <script type="module" src="src/scripts/dashboard.js"></script>
+</body>
+</html>

@@ -98,6 +98,10 @@ ${letterObject}
 }
 
 async function main() {
+    console.error("\nThis project now stores letters in MongoDB.");
+    console.error("Use the dashboard instead: http://localhost:5173/dashboard.html");
+    process.exit(1);
+
     console.log("\n💌 Moracarta — Add Letter\n");
 
     const GOOGLE_DOCS_URL = "\x1b[34mhttps://docs.google.com/document/\x1b[0m";

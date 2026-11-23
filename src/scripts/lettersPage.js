@@ -1,11 +1,54 @@
-import { letters } from '../loaders/lettersLoader.js';
 import generatePalette from './generatePalette.js';
+import { splitParagraphs } from './letterText.js';
+import { getLetters } from '../services/lettersApi.js';
 
-// Checks the URL to see what ID is select.
-// Then loads letter with that same ID.
+// Checks the URL to see what ID is selected, then loads that letter
+// from the API.
 const params = new URLSearchParams(window.location.search);
-const requestedId = parseInt(params.get('id'), 10);
-const letter = letters.find((entry) => entry.id === requestedId);
+const requestedId = params.get('id');
+
+const envelopeWrap = document.getElementById('envelope-wrap');
+const letterWrap = document.getElementById('letter-wrap');
+const letterNav = document.getElementById('letter-nav');
+const errorMessage = document.getElementById('error-message');
+const loadingMessage = document.getElementById('letter-loading');
+
+function setLoading(isLoading) {
+  if (loadingMessage) {
+    loadingMessage.hidden = !isLoading;
+  }
+}
+
+function hideContent() {
+  if (envelopeWrap) envelopeWrap.style.display = 'none';
+  if (letterWrap) letterWrap.style.display = 'none';
+  if (letterNav) letterNav.style.display = 'none';
+}
+
+function showError(message, { retry = false } = {}) {
+  setLoading(false);
+  hideContent();
+
+  if (!errorMessage) {
+    return;
+  }
+
+  errorMessage.style.display = 'block';
+  errorMessage.replaceChildren();
+
+  const paragraph = document.createElement('p');
+  paragraph.textContent = message;
+  errorMessage.appendChild(paragraph);
+
+  if (retry) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'error-retry';
+    button.textContent = 'Retry';
+    button.addEventListener('click', init);
+    errorMessage.appendChild(button);
+  }
+}
 
 function applyEnvelopePalette(letterItem) {
   const palette = generatePalette(letterItem);
@@ -24,41 +67,87 @@ function applyEnvelopePalette(letterItem) {
   }
 }
 
-if (!letter) {
-  document.getElementById('error-message').style.display = 'block';
-  document.getElementById('envelope-wrap').style.display = 'none';
-  document.getElementById('letter-wrap').style.display = 'none';
-  document.getElementById('letter-nav').style.display = 'none';
-} else {
+function renderBody(content) {
+  const body = document.getElementById('letter-body');
+
+  body.replaceChildren(
+    ...splitParagraphs(content).map((text) => {
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      return paragraph;
+    })
+  );
+}
+
+async function init() {
+  if (!requestedId) {
+    showError('Letter not found');
+    return;
+  }
+
+  if (errorMessage) {
+    errorMessage.style.display = 'none';
+  }
+
+  if (letterWrap) {
+    letterWrap.style.display = '';
+    letterWrap.classList.remove('visible');
+  }
+
+  if (letterNav) {
+    letterNav.style.display = '';
+    letterNav.classList.remove('visible');
+  }
+
+  setLoading(true);
+
+  let letters;
+
+  try {
+    letters = await getLetters();
+  } catch {
+    showError('Could not load letter.', { retry: true });
+    return;
+  }
+
+  const letter = letters.find((entry) => entry.id === requestedId);
+
+  if (!letter) {
+    showError('Letter not found');
+    return;
+  }
+
+  setLoading(false);
+
+  if (envelopeWrap) {
+    envelopeWrap.style.display = '';
+  }
+
   document.title = letter.title;
 
   document.getElementById('letter-date').textContent = letter.date;
   document.getElementById('letter-title').textContent = letter.title;
-  document.getElementById('letter-body').innerHTML = letter.content
-      .split(/\n\s*\n/)
-      .filter(paragraph => paragraph.trim())
-      .map(paragraph => `<p>${paragraph.trimEnd()}</p>`)
-      .join('');
+  renderBody(letter.content);
 
   applyEnvelopePalette(letter);
   document.querySelector('.envelope-stage').classList.add('ready');
 
-  const sortedLetters = letters.slice().sort((first, second) => first.id - second.id);
-  const currentIndex = sortedLetters.findIndex((entry) => entry.id === requestedId);
-  const previousLetter = currentIndex > 0 ? sortedLetters[currentIndex - 1] : null;
-  const nextLetter = currentIndex < sortedLetters.length - 1 ? sortedLetters[currentIndex + 1] : null;
+  const currentIndex = letters.findIndex((entry) => entry.id === requestedId);
+  const previousLetter = currentIndex > 0 ? letters[currentIndex - 1] : null;
+  const nextLetter =
+    currentIndex < letters.length - 1 ? letters[currentIndex + 1] : null;
 
-  document.getElementById('letter-counter').textContent = `${currentIndex + 1} Of ${sortedLetters.length}`;
+  document.getElementById('letter-counter').textContent = `${currentIndex + 1} Of ${letters.length}`;
 
   if (previousLetter) {
     const previousButton = document.getElementById('nav-previous');
-    previousButton.href = `./letters.html?id=${previousLetter.id}`;
+    previousButton.href = `./letters.html?id=${encodeURIComponent(previousLetter.id)}`;
     previousButton.classList.remove('invisible');
   }
 
   if (nextLetter) {
     const nextButton = document.getElementById('nav-next');
-    nextButton.href = `./letters.html?id=${nextLetter.id}`;
+    nextButton.href = `./letters.html?id=${encodeURIComponent(nextLetter.id)}`;
     nextButton.classList.remove('invisible');
   }
 
@@ -82,13 +171,14 @@ if (!letter) {
     document.getElementById('letter-wrap').classList.add('visible');
     document.getElementById('letter-nav').classList.add('visible');
     document.getElementById('envelope-wrap').style.display = 'none';
-
   }, 2100);
 }
 
-  // Floating heart particle animation for the letter view background.
-  // Particles are born after a delay, float upward, fade at the top, and die
-  // when they leave the canvas to keep the animation visually light.
+init();
+
+// Floating heart particle animation for the letter view background.
+// Particles are born after a delay, float upward, fade at the top, and die
+// when they leave the canvas to keep the animation visually light.
 function startHeartAnimation() {
   const canvas = document.getElementById('canvas-hearts');
   const context = canvas.getContext('2d');
@@ -201,5 +291,6 @@ function startHeartAnimation() {
       context.clearRect(0, 0, width, height);
     }
   }
+
   window.requestAnimationFrame(animate);
 }

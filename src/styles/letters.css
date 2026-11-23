@@ -403,3 +403,31 @@ body {
   z-index: 9999;
 }
   
+.letter-status {
+  text-align: center;
+  color: #a08060;
+  font-size: 15px;
+  font-style: italic;
+  padding: 22vh 24px 0;
+}
+
+.error-retry {
+  display: block;
+  margin: 14px auto 0;
+  padding: 8px 22px;
+  border: 1px solid rgba(168, 144, 110, 0.6);
+  border-radius: 999px;
+  background: transparent;
+  color: #d9b892;
+  font-family: var(--main-font);
+  font-size: 14px;
+  font-style: italic;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.error-retry:hover,
+.error-retry:focus-visible {
+  border-color: #d9b892;
+  color: var(--paper-dark);
+}
