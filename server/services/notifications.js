@@ -1,33 +1,31 @@
-import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
 
-export function createNotificationService({ env = process.env, transport } = {}) {
+export function createNotificationService({ env = process.env, gmailClient } = {}) {
   const configured = Boolean(
     env.GMAIL_USER &&
-    env.GMAIL_APP_PASSWORD &&
+    env.GMAIL_CLIENT_ID &&
+    env.GMAIL_CLIENT_SECRET &&
+    env.GMAIL_REFRESH_TOKEN &&
     env.NOTIFICATION_TO_EMAIL &&
     env.PUBLIC_SITE_URL
   );
 
-  const mailTransport = transport || (configured
-    ? nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: env.GMAIL_USER,
-        pass: env.GMAIL_APP_PASSWORD
-      },
-      connectionTimeout: 8_000,
-      greetingTimeout: 8_000,
-      socketTimeout: 8_000
-    })
-    : null);
+  let client = gmailClient;
+
+  if (!client && configured) {
+    const auth = new google.auth.OAuth2(
+      env.GMAIL_CLIENT_ID,
+      env.GMAIL_CLIENT_SECRET
+    );
+    auth.setCredentials({ refresh_token: env.GMAIL_REFRESH_TOKEN });
+    client = google.gmail({ version: 'v1', auth });
+  }
 
   return {
     async sendLetterCreated(letter) {
       return sendMail({
         configured,
-        mailTransport,
+        client,
         env,
         subject: `A new letter: ${letter.title}`,
         html: `<p>A new letter has been written for you.</p><p><strong>${escapeHtml(letter.title)}</strong></p><p><a href="${letterUrl(env, letter.id)}">Read the letter</a></p>`
@@ -36,7 +34,7 @@ export function createNotificationService({ env = process.env, transport } = {})
     async sendReplyCreated(letter, reply) {
       return sendMail({
         configured,
-        mailTransport,
+        client,
         env,
         subject: `A new reply to: ${letter.title}`,
         html: `<p>${escapeHtml(reply.authorName)} posted a reply.</p><p>${escapeHtml(reply.message)}</p><p><a href="${letterUrl(env, letter.id)}">View the letter</a></p>`
@@ -45,16 +43,24 @@ export function createNotificationService({ env = process.env, transport } = {})
   };
 }
 
-async function sendMail({ configured, mailTransport, env, subject, html }) {
-  if (!configured || !mailTransport) {
+async function sendMail({ configured, client, env, subject, html }) {
+  if (!configured || !client) {
     return { sent: false, skipped: true };
   }
 
-  await mailTransport.sendMail({
-    from: env.GMAIL_USER,
-    to: [env.NOTIFICATION_TO_EMAIL],
-    subject,
+  const message = [
+    `From: ${env.GMAIL_USER}`,
+    `To: ${env.NOTIFICATION_TO_EMAIL}`,
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    '',
     html
+  ].join('\r\n');
+
+  await client.users.messages.send({
+    userId: env.GMAIL_USER,
+    requestBody: { raw: Buffer.from(message).toString('base64url') }
   });
 
   return { sent: true };

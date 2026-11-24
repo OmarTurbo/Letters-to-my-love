@@ -70,24 +70,34 @@ npm.cmd run seed
 Use `npm.cmd run seed -- --force` only when you want to replace all stored
 letters with the examples.
 
-To enable notifications through Gmail, enable two-step verification on your
-Google account, create a Google **App Password**, and add these Render
-environment variables:
+To enable notifications through Gmail API, create a Google Cloud project,
+enable the Gmail API, configure an OAuth consent screen, create a Desktop OAuth
+client, and add these Render environment variables:
 
 ```env
 GMAIL_USER=your-gmail@gmail.com
-GMAIL_APP_PASSWORD=your-16-character-app-password
+GMAIL_CLIENT_ID=your-google-oauth-client-id
+GMAIL_CLIENT_SECRET=your-google-oauth-client-secret
+GMAIL_REFRESH_TOKEN=your-google-refresh-token
 NOTIFICATION_TO_EMAIL=your-partner@example.com
 PUBLIC_SITE_URL=https://your-app.onrender.com
 ```
 
-Use the 16-character App Password, not your normal Gmail password. Gmail may
-show the App Password with spaces; remove the spaces before saving it in
-Render.
+For local authorization, put `GMAIL_CLIENT_ID` and `GMAIL_CLIENT_SECRET` in
+`.env`, add `http://localhost:3000/oauth2callback` as an authorized redirect
+URI in Google Cloud, then run:
 
-Notifications are sent after a letter or public reply is saved. If Resend is
-not configured or temporarily fails, the letter/reply is still saved and the
-failure is logged by the server.
+```bash
+npm.cmd run gmail:authorize
+```
+
+Open the printed Google URL, approve Gmail send access, and copy the printed
+refresh token into Render as `GMAIL_REFRESH_TOKEN`. The refresh token is a
+secret and must never be committed.
+
+Notifications are sent after a letter or public reply is saved. If Gmail API
+is not configured or temporarily fails, the letter/reply is still saved and
+the failure is logged by the server.
 
 Start development with both the API and Vite site:
 
