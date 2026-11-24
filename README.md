@@ -70,15 +70,20 @@ npm.cmd run seed
 Use `npm.cmd run seed -- --force` only when you want to replace all stored
 letters with the examples.
 
-To enable notifications, create a Resend account, verify the sender domain,
-and add these Render environment variables:
+To enable notifications through Gmail, enable two-step verification on your
+Google account, create a Google **App Password**, and add these Render
+environment variables:
 
 ```env
-RESEND_API_KEY=re_xxxxxxxxx
+GMAIL_USER=your-gmail@gmail.com
+GMAIL_APP_PASSWORD=your-16-character-app-password
 NOTIFICATION_TO_EMAIL=your-partner@example.com
-NOTIFICATION_FROM_EMAIL=Letters <letters@yourdomain.com>
 PUBLIC_SITE_URL=https://your-app.onrender.com
 ```
+
+Use the 16-character App Password, not your normal Gmail password. Gmail may
+show the App Password with spaces; remove the spaces before saving it in
+Render.
 
 Notifications are sent after a letter or public reply is saved. If Resend is
 not configured or temporarily fails, the letter/reply is still saved and the
