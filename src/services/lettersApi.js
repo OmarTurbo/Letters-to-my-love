@@ -77,3 +77,21 @@ export function deleteLetter(id, password) {
     password
   });
 }
+
+export function getReplies(letterId) {
+  return request(`/api/letters/${encodeURIComponent(letterId)}/replies`);
+}
+
+export function postReply(letterId, data) {
+  return request(`/api/letters/${encodeURIComponent(letterId)}/replies`, {
+    method: 'POST',
+    body: data
+  });
+}
+
+export function deleteReply(letterId, id, password) {
+  return request(`/api/letters/${encodeURIComponent(letterId)}/replies/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    password
+  });
+}

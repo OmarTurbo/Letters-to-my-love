@@ -4,15 +4,21 @@ import { resolve } from "node:path";
 import { createRequireAdmin } from "./middleware/requireAdmin.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { createLettersRouter } from "./routes/letters.js";
+import { createRepliesRouter, createReplyAdminRouter } from "./routes/replies.js";
+import { createRateLimiter } from './middleware/rateLimit.js';
+import { createNotificationService } from './services/notifications.js';
 
 export function createApp({
   repo,
+  replyRepo,
   config,
+  notifications = createNotificationService(),
   distDir = resolve(process.cwd(), "dist")
 }) {
   const app = express();
 
   app.disable("x-powered-by");
+  app.set('trust proxy', 1);
   app.use(express.json({ limit: "100kb" }));
 
   const requireAdmin = createRequireAdmin(config.adminPassword);
@@ -25,7 +31,18 @@ export function createApp({
     res.json({ ok: true });
   });
 
-  app.use("/api/letters", createLettersRouter({ repo, requireAdmin }));
+  app.use("/api/letters", createLettersRouter({ repo, replyRepo, requireAdmin, notifications }));
+
+  if (replyRepo) {
+    app.use('/api/letters/:letterId/replies', createRepliesRouter({
+      letterRepo: repo,
+      replyRepo,
+      requireAdmin,
+      rateLimiter: createRateLimiter(),
+      notifications
+    }));
+    app.use('/api/letters', createReplyAdminRouter({ letterRepo: repo, replyRepo, requireAdmin }));
+  }
 
   app.use("/api", (req, res) => {
     res.status(404).json({ error: "Not found." });

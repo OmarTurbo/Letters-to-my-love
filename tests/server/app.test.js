@@ -57,7 +57,8 @@ function createFakeRepo(items = seed()) {
       const doc = store.get(String(id));
       store.delete(String(id));
       return doc ?? null;
-    }
+    },
+    async removeRepliesByLetter() {}
   };
 }
 

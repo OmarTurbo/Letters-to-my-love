@@ -67,6 +67,19 @@
       </div>
       <div class="letter-divider"></div>
       <div class="letter-body" id="letter-body"></div>
+      <section class="replies" aria-labelledby="replies-title">
+        <div class="letter-divider"></div>
+        <h2 id="replies-title">Replies</h2>
+        <div id="reply-list" class="reply-list"></div>
+        <form id="reply-form" class="reply-form">
+          <label for="reply-name">Your name</label>
+          <input id="reply-name" name="authorName" maxlength="80" required>
+          <label for="reply-message">Your reply</label>
+          <textarea id="reply-message" name="message" maxlength="2000" rows="4" required></textarea>
+          <p id="reply-status" class="reply-status" aria-live="polite"></p>
+          <button type="submit">Post reply</button>
+        </form>
+      </section>
       <div class="letter-footer">
         <span class="letter-footer-ornament"></span>
       </div>

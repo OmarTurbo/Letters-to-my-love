@@ -18,7 +18,7 @@ function assertValidId(id) {
   }
 }
 
-export function createLettersRouter({ repo, requireAdmin }) {
+export function createLettersRouter({ repo, requireAdmin, notifications, replyRepo }) {
   const router = Router();
 
   router.get(
@@ -50,7 +50,16 @@ export function createLettersRouter({ repo, requireAdmin }) {
     asyncHandler(async (req, res) => {
       const data = parseLetterInput(req.body);
       const letter = await repo.create(data);
-      res.status(201).json(toApiLetter(letter));
+      const apiLetter = toApiLetter(letter);
+      let notification = { status: 'skipped' };
+      try {
+        const result = await notifications.sendLetterCreated(apiLetter);
+        notification = { status: result?.sent ? 'sent' : 'skipped' };
+      } catch (error) {
+        console.error(`Letter notification failed: ${error.message}`);
+        notification = { status: 'failed' };
+      }
+      res.status(201).json({ ...apiLetter, notification });
     })
   );
 
@@ -81,6 +90,10 @@ export function createLettersRouter({ repo, requireAdmin }) {
 
       if (!letter) {
         return res.status(404).json({ error: "Letter not found." });
+      }
+
+      if (replyRepo) {
+        await replyRepo.removeByLetter(req.params.id);
       }
 
       return res.status(204).end();

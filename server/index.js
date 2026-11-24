@@ -3,6 +3,8 @@ import { loadConfig } from "./config.js";
 import { connectDatabase, disconnectDatabase } from "./db.js";
 import { Letter } from "./models/Letter.js";
 import { createLetterRepository } from "./repositories/letterRepository.js";
+import { Reply } from './models/Reply.js';
+import { createReplyRepository } from './repositories/replyRepository.js';
 import { createApp } from "./app.js";
 
 async function main() {
@@ -21,6 +23,7 @@ async function main() {
 
   const app = createApp({
     repo: createLetterRepository(Letter),
+    replyRepo: createReplyRepository(Reply),
     config
   });
 

@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   getLetters,
+  getReplies,
+  postReply,
   createLetter,
   deleteLetter,
   ApiError
@@ -89,4 +91,16 @@ test("network failures throw ApiError with status 0", async (t) => {
     assert.equal(error.status, 0);
     return true;
   });
+});
+
+test('getReplies and postReply use the letter reply endpoints', async (t) => {
+  const calls = stubFetch(t, (url, options) => new Response(JSON.stringify({ url, method: options.method }), {
+    status: 201,
+    headers: { 'content-type': 'application/json' }
+  }));
+  await getReplies('letter/1');
+  await postReply('letter/1', { authorName: 'Mary', message: 'Hello' });
+  assert.equal(calls[0].url, '/api/letters/letter%2F1/replies');
+  assert.equal(calls[1].url, '/api/letters/letter%2F1/replies');
+  assert.equal(calls[1].options.method, 'POST');
 });

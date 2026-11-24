@@ -431,3 +431,22 @@ body {
   border-color: #d9b892;
   color: var(--paper-dark);
 }
+
+.replies {
+  position: relative;
+  z-index: 1;
+  margin-top: 34px;
+  font-family: 'EB Garamond', Georgia, serif;
+}
+
+.replies h2 { font-size: 25px; font-weight: 500; margin-bottom: 16px; }
+.reply-list { display: grid; gap: 12px; }
+.reply-item { border-left: 2px solid rgba(139, 46, 46, .35); padding: 5px 0 5px 14px; }
+.reply-item strong { color: var(--red); font-size: 16px; }
+.reply-item p { margin: 3px 0 0; line-height: 1.45; white-space: pre-wrap; }
+.reply-empty, .reply-status { color: var(--ink-soft); font-style: italic; }
+.reply-form { display: grid; gap: 6px; margin-top: 22px; }
+.reply-form label { color: var(--ink-soft); font-size: 14px; }
+.reply-form input, .reply-form textarea { width: 100%; border: 1px solid rgba(122, 98, 72, .35); background: rgba(255,255,255,.4); color: var(--ink); padding: 8px; font: inherit; }
+.reply-form button { justify-self: start; border: 1px solid var(--red); background: transparent; color: var(--red); padding: 7px 16px; font: inherit; cursor: pointer; }
+.reply-form button:disabled { opacity: .55; cursor: wait; }

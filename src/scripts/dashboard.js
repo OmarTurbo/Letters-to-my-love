@@ -2,7 +2,9 @@ import {
   ApiError,
   createLetter,
   deleteLetter,
+  deleteReply,
   getLetters,
+  getReplies,
   updateLetter,
   verifyPassword
 } from '../services/lettersApi.js';
@@ -91,8 +93,51 @@ function renderLetters() {
     remove.type = 'button';
     remove.textContent = 'Delete';
     remove.addEventListener('click', () => removeLetter(letter, remove));
+    const repliesButton = document.createElement('button');
+    repliesButton.className = 'button button-ghost';
+    repliesButton.type = 'button';
+    repliesButton.textContent = 'Replies';
+    const repliesPanel = document.createElement('div');
+    repliesPanel.className = 'dashboard-replies';
+    repliesPanel.hidden = true;
+    repliesButton.addEventListener('click', async () => {
+      repliesPanel.hidden = !repliesPanel.hidden;
+      if (repliesPanel.hidden) return;
+      repliesPanel.textContent = 'Loading replies…';
+      try {
+        const replies = await getReplies(letter.id);
+        repliesPanel.replaceChildren();
+        if (!replies.length) repliesPanel.textContent = 'No replies yet.';
+        replies.forEach((reply) => {
+          const row = document.createElement('div');
+          row.className = 'dashboard-reply';
+          const text = document.createElement('span');
+          text.textContent = `${reply.authorName}: ${reply.message}`;
+          const deleteButton = document.createElement('button');
+          deleteButton.className = 'button button-ghost';
+          deleteButton.type = 'button';
+          deleteButton.textContent = 'Delete';
+          deleteButton.addEventListener('click', async () => {
+            deleteButton.disabled = true;
+            try {
+              await deleteReply(letter.id, reply.id, savedPassword());
+              row.remove();
+              setStatus('Reply deleted.');
+            } catch (error) {
+              if (!handleUnauthorized(error)) setStatus(error.message || 'Could not delete reply.');
+              deleteButton.disabled = false;
+            }
+          });
+          row.append(text, deleteButton);
+          repliesPanel.appendChild(row);
+        });
+      } catch (error) {
+        repliesPanel.textContent = error.message || 'Could not load replies.';
+      }
+    });
+    actions.append(repliesButton);
     actions.append(edit, remove);
-    card.append(info, actions);
+    card.append(info, actions, repliesPanel);
     list.appendChild(card);
   });
 }
@@ -174,11 +219,15 @@ form.addEventListener('submit', async (event) => {
   button.disabled = true;
   const data = { title: titleInput.value, content: contentInput.value, date: dateInput.value };
   try {
-    if (idInput.value) await updateLetter(idInput.value, data, savedPassword());
-    else await createLetter(data, savedPassword());
+    const saved = idInput.value
+      ? await updateLetter(idInput.value, data, savedPassword())
+      : await createLetter(data, savedPassword());
     closeEditor();
     await loadLetters();
-    setStatus(idInput.value ? 'Letter updated.' : 'Letter saved.');
+    const action = idInput.value ? 'Letter updated.' : 'Letter saved.';
+    setStatus(saved?.notification?.status === 'failed'
+      ? `${action} Notification could not be sent.`
+      : action);
   } catch (error) {
     if (!handleUnauthorized(error)) formError.textContent = error.message || 'Could not save letter.';
   } finally { button.disabled = false; }

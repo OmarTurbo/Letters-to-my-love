@@ -47,11 +47,13 @@ textarea { min-height: 18rem; line-height: 1.55; resize: vertical; }
 .toolbar { margin-bottom: 20px; }
 .status { min-height: 25px; color: var(--accent); font-style: italic; margin: 0 0 12px; }
 .dashboard-list { display: grid; gap: 12px; }
-.letter-card { display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255, 253, 249, .8); border: 1px solid var(--line); border-radius: 9px; padding: 18px 20px; }
+.letter-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; background: rgba(255, 253, 249, .8); border: 1px solid var(--line); border-radius: 9px; padding: 18px 20px; }
 .letter-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 600; margin: 0; }
 .letter-meta, .letter-preview { color: var(--muted); margin: 3px 0 0; }
 .letter-preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 590px; }
 .card-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.dashboard-replies { width: 100%; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 12px; color: var(--muted); }
+.dashboard-reply { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid rgba(216, 200, 181, .55); }
 .editor-panel { margin-top: 30px; }
 .editor-heading { margin-bottom: 18px; }
 .form-error { color: var(--accent); min-height: 1.3em; margin: 2px 0 3px; }

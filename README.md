@@ -70,6 +70,20 @@ npm.cmd run seed
 Use `npm.cmd run seed -- --force` only when you want to replace all stored
 letters with the examples.
 
+To enable notifications, create a Resend account, verify the sender domain,
+and add these Render environment variables:
+
+```env
+RESEND_API_KEY=re_xxxxxxxxx
+NOTIFICATION_TO_EMAIL=your-partner@example.com
+NOTIFICATION_FROM_EMAIL=Letters <letters@yourdomain.com>
+PUBLIC_SITE_URL=https://your-app.onrender.com
+```
+
+Notifications are sent after a letter or public reply is saved. If Resend is
+not configured or temporarily fails, the letter/reply is still saved and the
+failure is logged by the server.
+
 Start development with both the API and Vite site:
 
 ```bash
@@ -91,6 +105,41 @@ On Windows PowerShell, use `npm.cmd` if the `npm` command is blocked by the
 PowerShell execution policy. The old `moracarta add` and `moracarta remove`
 commands are deprecated and no longer affect the live MongoDB site; use the
 dashboard instead. A static-only deployment will not show database letters.
+
+### Deploying to Vercel
+
+This project includes a Vercel serverless function at `api/index.js`. To
+deploy:
+
+1. Push the project to GitHub.
+2. Import the repository at [vercel.com](https://vercel.com).
+3. Keep the default build settings, or use:
+   - Build command: `npm run build`
+   - Output directory: `dist`
+4. Add these Vercel environment variables for the Production environment:
+
+```env
+MONGODB_URI=mongodb+srv://...
+MONGODB_DB=letters
+ADMIN_PASSWORD=your-long-password
+```
+
+5. Deploy the project.
+
+Vercel will serve the public site and dashboard, while `/api/*` is routed to
+the serverless Express function. MongoDB Atlas must allow Vercel connections;
+for the simplest setup, allow `0.0.0.0/0` and use a strong database password.
+
+Seed the production database from a local terminal using the same production
+environment values:
+
+```bash
+npx vercel env pull .env
+npm.cmd run seed
+```
+
+Run this in a clean clone or back up your local `.env` first. Never commit
+`.env`.
 
 ## Requirements
 

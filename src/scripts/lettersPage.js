@@ -1,6 +1,6 @@
 import generatePalette from './generatePalette.js';
 import { splitParagraphs } from './letterText.js';
-import { getLetters } from '../services/lettersApi.js';
+import { getLetters, getReplies, postReply } from '../services/lettersApi.js';
 
 // Checks the URL to see what ID is selected, then loads that letter
 // from the API.
@@ -79,6 +79,63 @@ function renderBody(content) {
   );
 }
 
+function renderReplies(replies) {
+  const list = document.getElementById('reply-list');
+  list.replaceChildren();
+  if (!replies.length) {
+    const empty = document.createElement('p');
+    empty.className = 'reply-empty';
+    empty.textContent = 'Be the first to reply.';
+    list.appendChild(empty);
+    return;
+  }
+  replies.forEach((reply) => {
+    const item = document.createElement('article');
+    item.className = 'reply-item';
+    const author = document.createElement('strong');
+    author.textContent = reply.authorName;
+    const message = document.createElement('p');
+    message.textContent = reply.message;
+    item.append(author, message);
+    list.appendChild(item);
+  });
+}
+
+async function loadReplies() {
+  try {
+    renderReplies(await getReplies(requestedId));
+  } catch {
+    document.getElementById('reply-status').textContent = 'Replies could not be loaded.';
+  }
+}
+
+function setupReplyForm() {
+  document.getElementById('reply-form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const status = document.getElementById('reply-status');
+    const button = form.querySelector('button');
+    const authorName = document.getElementById('reply-name').value.trim();
+    const message = document.getElementById('reply-message').value.trim();
+    if (!authorName || !message) {
+      status.textContent = 'Name and reply are required.';
+      return;
+    }
+    button.disabled = true;
+    status.textContent = 'Posting…';
+    try {
+      await postReply(requestedId, { authorName, message });
+      form.reset();
+      status.textContent = 'Reply posted.';
+      await loadReplies();
+    } catch (error) {
+      status.textContent = error.message || 'Could not post reply.';
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 async function init() {
   if (!requestedId) {
     showError('Letter not found');
@@ -130,6 +187,8 @@ async function init() {
   renderBody(letter.content);
 
   applyEnvelopePalette(letter);
+  setupReplyForm();
+  loadReplies();
   document.querySelector('.envelope-stage').classList.add('ready');
 
   const currentIndex = letters.findIndex((entry) => entry.id === requestedId);
